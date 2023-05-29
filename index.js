@@ -32,5 +32,3 @@ app.use('/api', authController)
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}!`)
 })
-
-export default app
