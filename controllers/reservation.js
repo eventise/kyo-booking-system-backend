@@ -6,10 +6,15 @@ const reservations = Router()
 
 // Get Reservations by Date
 reservations.get('/', async (req, res) => {
-    const { date } = req.body
-
     try {
-        const reservations = await Reservation.find({ booking_date: date, status: { $ne: 'Cancelled' } }).populate({
+        const { date } = req.query
+
+        let query = { status: { $ne: 'Cancelled' } }
+        if (date) {
+            query.booking_date = date
+        }
+
+        const reservations = await Reservation.find(query).populate({
             path: 'table',
             populate: {
                 path: 'section',
