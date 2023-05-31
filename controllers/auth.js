@@ -11,7 +11,7 @@ auth.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ email })
         if (!user) {
-            return res.status(401).json({ error: 'Incorrect username' })
+            return res.status(400).json({ error: 'Email not found' })
         }
 
         const result = await bcrypt.compare(password, user.password)
@@ -19,7 +19,7 @@ auth.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid password ' })
         }
 
-        const token = jwt.sign({ userID: user._id, role: user.role }, 'kyobookingsystem')
+        const token = jwt.sign({ name: user.name, contact: user.contact, email: user.email, role: user.role }, 'kyobookingsystem')
 
         res.json({ token })
     } catch (error) {
