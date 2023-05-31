@@ -6,6 +6,7 @@ import reservationController from './controllers/reservation.js'
 import sectionController from './controllers/section.js'
 import tableController from './controllers/table.js'
 import authController from './controllers/auth.js'
+import usersController from './controllers/user.js'
 
 const app = express()
 const PORT = 8080
@@ -27,6 +28,7 @@ app.use(cors())
 app.use('/api/reservations', reservationController)
 app.use('/api/sections', sectionController)
 app.use('/api/tables', tableController)
+app.use('/api/users', usersController)
 app.use('/api', authController)
 
 app.listen(PORT, () => {

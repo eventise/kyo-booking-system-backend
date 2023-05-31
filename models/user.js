@@ -20,6 +20,12 @@ const userSchema = new Schema({
         enum: ['user', 'admin'],
         default: 'user',
     },
+    reset_password_token: {
+        type: String,
+    },
+    reset_password_expires: {
+        type: Number,
+    },
 })
 
 const userModel = model('User', userSchema)
