@@ -5,9 +5,6 @@ const sectionSchema = new Schema({
         type: String,
         required: true,
     },
-    shared_minimum_spend: {
-        type: Number,
-    },
     tables: [
         {
             type: Schema.Types.ObjectId,

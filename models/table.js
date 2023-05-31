@@ -5,7 +5,7 @@ const tableSchema = new Schema({
         type: String,
         required: true,
     },
-    standard_minimum_spend: {
+    minimum_spend: {
         type: Number,
         required: true,
     },

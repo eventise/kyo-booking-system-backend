@@ -21,6 +21,10 @@ const reservationSchema = new Schema({
         type: Number,
         required: true,
     },
+    minimum_spend: {
+        type: Number,
+        required: true,
+    },
     notes: {
         type: String,
     },
