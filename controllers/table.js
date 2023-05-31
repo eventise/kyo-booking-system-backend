@@ -46,7 +46,7 @@ tables.get('/available', async (req, res) => {
 
         const tables = availableTables.map((table) => ({ ...table, minimum_spend: minimumSpends.map((spend) => spend.table.toString()).includes(table._id.toString()) ? minimumSpends.find((spend) => spend.table.toString() === table._id.toString()).minimum_spend : table.minimum_spend }))
 
-        res.status(200).json({ tables })
+        res.status(200).json({ availableTables: tables })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
