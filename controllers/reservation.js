@@ -27,7 +27,7 @@ reservations.get('/', async (req, res) => {
 // Create a Reservation
 reservations.post('/', async (req, res) => {
     try {
-        const { customerName, customerEmail, customerContact, bookingDate, partySize, tableName } = req.body
+        const { customerName, customerEmail, customerContact, bookingDate, minimumSpend, partySize, tableName, notes } = req.body
 
         const table = await Table.findOne({ name: tableName })
         if (!table) {
@@ -48,8 +48,10 @@ reservations.post('/', async (req, res) => {
             customer_email: customerEmail,
             customer_contact: customerContact,
             booking_date: bookingDate,
+            minimum_spend: minimumSpend,
             party_size: partySize,
             table: table._id,
+            notes: notes,
         })
 
         await reservation.save()
@@ -120,6 +122,21 @@ reservations.patch('/:id/status', async (req, res) => {
         await reservation.save()
 
         res.status(200).json({ message: 'Reservation status updated', reservation })
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ error: 'Server error' })
+    }
+})
+
+reservations.delete('/', async (req, res) => {
+    try {
+        const result = await Reservation.deleteMany({})
+
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: 'All reservations deleted successfully' })
+        } else {
+            res.status(404).json({ error: 'No reservations found' })
+        }
     } catch (err) {
         console.error(err)
         res.status(500).json({ error: 'Server error' })

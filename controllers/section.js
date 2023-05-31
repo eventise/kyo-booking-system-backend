@@ -3,25 +3,19 @@ import Section from '../models/section.js'
 
 const sections = Router()
 
-// Get all sections
+// Get Sections
 sections.get('/', async (req, res) => {
     try {
-        const sections = await Section.find().populate({ path: 'tables', select: 'name minimum_spend maximum_party_size' })
+        const { name } = req.query
+
+        let query = {}
+        if (name) {
+            query.name = name
+        }
+
+        const sections = await Section.find(query).populate({ path: 'tables', select: 'name minimum_spend maximum_party_size' })
 
         res.status(200).json({ sections })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'Server error' })
-    }
-})
-
-// Get a section
-sections.get('/:name', async (req, res) => {
-    try {
-        const sectionName = req.params.name
-        const section = await Section.find({ name: sectionName }).populate({ path: 'tables', select: 'name minimum_spend maximum_party_size' })
-
-        res.status(200).json({ section })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
@@ -31,12 +25,11 @@ sections.get('/:name', async (req, res) => {
 // Create a section
 sections.post('/', async (req, res) => {
     try {
-        const { name, tables, sharedMinimumSpend } = req.body
+        const { name, tables } = req.body
 
         const section = new Section({
             name,
             tables,
-            shared_minimum_spend: sharedMinimumSpend,
         })
 
         await section.save()

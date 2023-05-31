@@ -2,23 +2,30 @@ import { Router } from 'express'
 import Table from '../models/table.js'
 import Section from '../models/section.js'
 import Reservation from '../models/reservation.js'
+import MinimumSpend from '../models/minimum-spend.js'
 
 const tables = Router()
 
-// Get table by name
+// Get Tables
 tables.get('/', async (req, res) => {
     try {
-        const { name } = req.body
-        const table = await Table.find({ name }).populate({ path: 'section', select: 'name' })
+        const { name } = req.query
 
-        res.json({ table })
+        let query = {}
+        if (name) {
+            query.name = { $regex: name, $options: 'i' }
+        }
+
+        const tables = await Table.find(query).populate({ path: 'section', select: 'name' })
+
+        res.json({ tables })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
     }
 })
 
-// Get available tables on a specific date
+// Get Available Tables (by Date)
 tables.get('/available', async (req, res) => {
     const { date } = req.query
 
@@ -33,9 +40,13 @@ tables.get('/available', async (req, res) => {
 
         const reservedTables = reservations.map((r) => r.table.name)
 
-        const availableTables = await Table.find({ name: { $nin: reservedTables } })
+        const availableTables = await Table.find({ name: { $nin: reservedTables } }).lean()
 
-        res.status(200).json({ availableTables })
+        const minimumSpends = await MinimumSpend.find({ date }).lean()
+
+        const tables = availableTables.map((table) => ({ ...table, minimum_spend: minimumSpends.map((spend) => spend.table.toString()).includes(table._id.toString()) ? minimumSpends.find((spend) => spend.table.toString() === table._id.toString()).minimum_spend : table.minimum_spend }))
+
+        res.status(200).json({ tables })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
@@ -45,7 +56,7 @@ tables.get('/available', async (req, res) => {
 // Create a table
 tables.post('/', async (req, res) => {
     try {
-        const { name, standardMinimumSpend, maximumPartySize, sectionName } = req.body
+        const { name, minimumSpend, maximumPartySize, sectionName } = req.body
 
         const section = await Section.findOne({ name: sectionName })
         if (!section) {
@@ -54,7 +65,7 @@ tables.post('/', async (req, res) => {
 
         const table = new Table({
             name,
-            standard_minimum_spend: standardMinimumSpend,
+            minimum_spend: minimumSpend,
             maximum_party_size: maximumPartySize,
             section: section._id,
         })
@@ -65,6 +76,31 @@ tables.post('/', async (req, res) => {
         await section.save()
 
         return res.status(201).json({ message: 'Table created', table })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Server error' })
+    }
+})
+
+// Create Custom Minimum Spend
+tables.post('/minimum-spend', async (req, res) => {
+    try {
+        const { name, date, minimumSpend } = req.body
+
+        const table = await Table.findOne({ name })
+        if (!table) {
+            return res.status(404).json({ error: 'Table not found' })
+        }
+
+        const customMinimumSpend = new MinimumSpend({
+            table: table._id,
+            minimum_spend: minimumSpend,
+            date,
+        })
+
+        await customMinimumSpend.save()
+
+        return res.status(201).json({ message: 'Custom minimum spend created', customMinimumSpend })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
