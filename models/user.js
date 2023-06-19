@@ -11,6 +11,7 @@ const userSchema = new Schema({
     },
     name: {
         type: String,
+        default: 'Anonymous',
     },
     contact: {
         type: String,
